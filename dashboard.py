@@ -113,6 +113,16 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+# --- Force Sidebar to Stay Visible ---
+st.markdown("""
+<style>
+[data-testid="stSidebar"] {
+    transform: translateX(0px) !important;
+    visibility: visible !important;
+    width: 22rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # --- Session State Init ---
 if 'selected_city' not in st.session_state:
