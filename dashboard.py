@@ -20,7 +20,38 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+# --- Floating Sidebar Toggle Button ---
+toggle_sidebar = """
+    <style>
+        #openSidebarButton {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #0a84ff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 9999;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
 
+    <script>
+        function openSidebar() {
+            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+            if (sidebar) {
+                sidebar.style.transform = "translateX(0px)";
+            }
+        }
+    </script>
+
+    <div id="openSidebarButton" onclick="openSidebar()">☰ Show Menu</div>
+"""
+
+st.markdown(toggle_sidebar, unsafe_allow_html=True)
 # --- Custom CSS (Dark Theme) ---
 st.markdown("""
 <style>
