@@ -109,7 +109,7 @@ end = datetime.utcnow()
 start = end - timedelta(hours=24)
 
 with st.spinner(f"Fetching real-time AQI data for {selected_city}..."):
-    df = fetch_aqi_history(lat, lon, start, end)
+    df = fetch_aqi_history(lat, lon, past_days=1)
 
 # Clean Data
 df['pm2_5'] = df['pm2_5'].apply(safe_value)
