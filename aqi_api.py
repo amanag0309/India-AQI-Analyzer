@@ -9,7 +9,7 @@ def fetch_aqi_history(lat, lon, past_days=7):
     Returns a DataFrame with 'time' index and pollutant columns.
     Filters out future timestamps.
     """
-    url = "https://air-quality-api.open-meteo.com/v1/air-quality"
+    url = "https://openweathermap.org/api/air-pollution?utm_source=chatgpt.com"
     
     # We ask for past_days + forecast (default 0 forecast days usually, but API gives some)
     # We will filter strictly by current time.
