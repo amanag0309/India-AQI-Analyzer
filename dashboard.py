@@ -6,7 +6,7 @@ from datetime import timedelta
 
 # Local modules
 from city_loader import get_all_cities, get_coords
-from aqi_api import fetch_aqi_history
+from aqi_api import fetch_aqi_current, fetch_aqi_history
 from utils import safe_value, get_aqi_category, get_aqi_color, health_recommendation
 
 LINKEDIN_URL = "https://www.linkedin.com/in/aman-agarwal0309/"
@@ -130,25 +130,28 @@ if lat is None:
     st.error("City coordinates not found.")
     st.stop()
 
-# Fetch 30 days to support all charts
-with st.spinner(f"Fetching data for {selected_city}..."):
-    df = fetch_aqi_history(lat, lon, past_days=30)
+with st.spinner(f"Fetching AQI data for {selected_city}..."):
+    current = fetch_aqi_current(lat, lon)
 
-if df.empty:
-    st.error("No data available for this location.")
-    st.stop()
+    if not current:
+        st.error("AQI data not available for this location.")
+        st.stop()
 
-# Latest Data
-latest_row = df.iloc[-1]
-current_pm25 = safe_value(latest_row.get('pm2_5'))
-current_pm10 = safe_value(latest_row.get('pm10'))
-current_no2 = safe_value(latest_row.get('no2'))
-current_o3 = safe_value(latest_row.get('o3'))
-current_so2 = safe_value(latest_row.get('so2'))
-current_co = safe_value(latest_row.get('co'))
+    df = fetch_aqi_history(lat, lon)
 
-category = get_aqi_category(current_pm25)
+# Latest Data (AQICN)
+current_pm25 = safe_value(current.get('pm2_5'))
+current_pm10 = safe_value(current.get('pm10'))
+current_no2 = safe_value(current.get('no2'))
+current_o3 = safe_value(current.get('o3'))
+current_so2 = safe_value(current.get('so2'))
+current_co = safe_value(current.get('co'))
+current_aqi = safe_value(current.get('aqi'))
+
+
+category = get_aqi_category(current_aqi)
 color = get_aqi_color(category)
+
 
 # --- Layout ---
 col_left, col_right = st.columns([1, 2.5])
