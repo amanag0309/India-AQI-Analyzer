@@ -6,7 +6,7 @@ from datetime import timedelta
 
 # Local modules
 from city_loader import get_all_cities, get_coords
-from aqi_api import fetch_aqi_current, fetch_aqi_history
+from aqi_api import fetch_aqi_history
 from utils import safe_value, get_aqi_category, get_aqi_color, health_recommendation
 
 LINKEDIN_URL = "https://www.linkedin.com/in/aman-agarwal0309/"
@@ -291,15 +291,17 @@ with col_right:
     with c_head1:
         st.markdown(f"## AQI for {selected_city}")
     with c_head2:
-        range_opt = st.selectbox("Range", ["24 Hours", "7 Days", "30 Days"], label_visibility="collapsed")
+        range_opt = st.selectbox("Range", ["24 Hours", "7 Days", "Last 5 Days"], label_visibility="collapsed")
     
     # Chart Logic
     if range_opt == "24 Hours":
         plot_df = df.tail(24)
     elif range_opt == "7 Days":
-        plot_df = df.tail(24 * 7)
+        plot_df = df.tail(24 * 5)  # OpenWeather free tier (max 5 days)
     else:
-        plot_df = df # 30 days
+        plot_df = df
+
+
     
     # Dynamic Color for Chart
     max_val = plot_df['pm2_5'].max()
