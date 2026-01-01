@@ -1,52 +1,47 @@
+import os
 import requests
 import pandas as pd
+from datetime import datetime
 
-# Your AQICN token (keep it inside quotes)
-AQICN_TOKEN = "09b566a5d6ed5ca027b08b665ce72e1454a134d1"
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+
+if not OPENWEATHER_API_KEY:
+    raise RuntimeError("OPENWEATHER_API_KEY not set")
 
 
-def fetch_aqi_current(lat, lon):
+def fetch_aqi_history(lat, lon, past_days=5):
     """
-    Fetch current AQI and pollutants using AQICN API
+    Fetch real hourly air pollution data (geo-based)
+    Free tier supports up to 5 days
     """
-    url = f"https://api.waqi.info/feed/geo:{lat};{lon}/?token={AQICN_TOKEN}"
-    res = requests.get(url, timeout=10)
-    data = res.json()
+    end = int(datetime.utcnow().timestamp())
+    start = end - past_days * 24 * 3600
 
-    if data.get("status") != "ok":
-        return None
+    url = (
+        "https://api.openweathermap.org/data/2.5/air_pollution/history"
+        f"?lat={lat}&lon={lon}&start={start}&end={end}&appid={OPENWEATHER_API_KEY}"
+    )
 
-    d = data["data"]
-    iaqi = d.get("iaqi", {})
+    res = requests.get(url, timeout=10).json()
 
-    return {
-        "aqi": d.get("aqi"),
-        "pm2_5": iaqi.get("pm25", {}).get("v"),
-        "pm10": iaqi.get("pm10", {}).get("v"),
-        "no2": iaqi.get("no2", {}).get("v"),
-        "o3": iaqi.get("o3", {}).get("v"),
-        "so2": iaqi.get("so2", {}).get("v"),
-        "co": iaqi.get("co", {}).get("v"),
-    }
-
-
-def fetch_aqi_history(lat, lon, past_days=30):
-    """
-    Minimal-change compatibility function.
-    Generates a stable DataFrame so all charts work.
-    """
-    current = fetch_aqi_current(lat, lon)
-
-    if not current or current["pm2_5"] is None:
+    if "list" not in res:
         return pd.DataFrame()
 
-    hours = past_days * 24
+    rows = []
+    for item in res["list"]:
+        c = item["components"]
+        rows.append({
+            "timestamp": datetime.utcfromtimestamp(item["dt"]),
+            "pm2_5": c.get("pm2_5"),
+            "pm10": c.get("pm10"),
+            "no2": c.get("no2"),
+            "o3": c.get("o3"),
+            "so2": c.get("so2"),
+            "co": c.get("co"),
+        })
 
-    return pd.DataFrame({
-        "pm2_5": [current["pm2_5"]] * hours,
-        "pm10": [current["pm10"]] * hours,
-        "no2": [current["no2"]] * hours,
-        "o3": [current["o3"]] * hours,
-        "so2": [current["so2"]] * hours,
-        "co": [current["co"]] * hours,
-    })
+    df = pd.DataFrame(rows)
+    df = df.set_index("timestamp").sort_index()
+    # Normalize to hourly data so charts change with range selection
+    df = df.resample("1H").mean().interpolate()
+    return df
