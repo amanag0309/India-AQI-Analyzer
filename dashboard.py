@@ -130,27 +130,26 @@ if lat is None:
     st.error("City coordinates not found.")
     st.stop()
 
-with st.spinner(f"Fetching AQI data for {selected_city}..."):
-    current = fetch_aqi_current(lat, lon)
 
-    if not current:
-        st.error("AQI data not available for this location.")
-        st.stop()
 
     df = fetch_aqi_history(lat, lon)
+    st.write("Total rows:", len(df))
+
 
 # Latest Data (AQICN)
-current_pm25 = safe_value(current.get('pm2_5'))
-current_pm10 = safe_value(current.get('pm10'))
-current_no2 = safe_value(current.get('no2'))
-current_o3 = safe_value(current.get('o3'))
-current_so2 = safe_value(current.get('so2'))
-current_co = safe_value(current.get('co'))
-current_aqi = safe_value(current.get('aqi'))
+# Latest Data (from OpenWeather history)
+latest_row = df.iloc[-1]
 
+current_pm25 = safe_value(latest_row.get('pm2_5'))
+current_pm10 = safe_value(latest_row.get('pm10'))
+current_no2  = safe_value(latest_row.get('no2'))
+current_o3   = safe_value(latest_row.get('o3'))
+current_so2  = safe_value(latest_row.get('so2'))
+current_co   = safe_value(latest_row.get('co'))
 
-category = get_aqi_category(current_aqi)
+category = get_aqi_category(current_pm25)
 color = get_aqi_color(category)
+
 
 
 # --- Layout ---
