@@ -136,8 +136,7 @@ if df is None or df.empty:
     st.error("No data available for this location.")
     st.stop()
 
-# TEMP DEBUG (remove later)
-st.write("Total rows:", len(df))
+
 
 # Latest Data (from OpenWeather history)
 latest_row = df.iloc[-1]
