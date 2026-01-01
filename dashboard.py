@@ -130,17 +130,20 @@ if lat is None:
     st.error("City coordinates not found.")
     st.stop()
 
+df = fetch_aqi_history(lat, lon)
 
+if df is None or df.empty:
+    st.error("No data available for this location.")
+    st.stop()
 
-    df = fetch_aqi_history(lat, lon)
-    st.write("Total rows:", len(df))
+# TEMP DEBUG (remove later)
+st.write("Total rows:", len(df))
 
-
-# Latest Data (AQICN)
 # Latest Data (from OpenWeather history)
 latest_row = df.iloc[-1]
 
 current_pm25 = safe_value(latest_row.get('pm2_5'))
+
 current_pm10 = safe_value(latest_row.get('pm10'))
 current_no2  = safe_value(latest_row.get('no2'))
 current_o3   = safe_value(latest_row.get('o3'))
