@@ -41,7 +41,8 @@ def fetch_aqi_history(lat, lon, past_days=5):
         })
 
     df = pd.DataFrame(rows)
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.set_index("timestamp").sort_index()
     # Normalize to hourly data so charts change with range selection
-    df = df.resample("1H").mean().interpolate()
+    df = df.resample("1h").mean().interpolate()
     return df
